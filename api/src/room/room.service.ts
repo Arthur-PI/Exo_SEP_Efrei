@@ -11,10 +11,6 @@ export type RoomFindData = {
   orderBy?: Prisma.RoomOrderByWithRelationInput;
 };
 
-function format_date(date: Date) {
-  return date.toISOString().substring(0, 10);
-}
-
 @Injectable()
 export class RoomService {
   private readonly logger = new Logger(RoomService.name);

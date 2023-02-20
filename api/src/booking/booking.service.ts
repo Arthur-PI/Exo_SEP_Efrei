@@ -3,7 +3,6 @@ import { RoomService } from '@/room/room.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { Booking, Prisma } from '@prisma/client';
 import { PrismaClientValidationError } from '@prisma/client/runtime';
-import { type } from 'os';
 
 type BookingFindData = {
   skip?: number;

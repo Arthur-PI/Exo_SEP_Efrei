@@ -27,9 +27,9 @@ export class BookingController {
   ) {}
 
   @Get()
-  async findAll(@Param() param) {
+  async findAll() {
     try {
-      return await this.bookingService.bookings({ where: param });
+      return await this.bookingService.bookings();
     } catch (err: any) {
       throw new InternalServerErrorException();
     }

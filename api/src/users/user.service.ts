@@ -1,7 +1,6 @@
 import { PrismaService } from '@/prisma.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { User, Prisma, Credential } from '@prisma/client';
-import { hash } from 'bcrypt';
 
 type UserFindData = {
   skip?: number;
@@ -10,10 +9,6 @@ type UserFindData = {
   where?: Prisma.UserWhereInput;
   orderBy?: Prisma.UserOrderByWithRelationInput;
 };
-
-interface UserCreate extends Prisma.UserCreateInput {
-  password: string;
-}
 
 @Injectable()
 export class UserService {
@@ -31,18 +26,23 @@ export class UserService {
     return this.prisma.user.findMany(params);
   }
 
-  async createUser(data: UserCreate): Promise<Credential> {
-    const hashed_password = await hash(data.password, 10);
+  async createUser(
+    data: Prisma.UserCreateInput,
+    password: string,
+  ): Promise<Credential> {
     return this.prisma.credential.create({
       data: {
-        password: hashed_password,
+        password,
         user: {
-          create: {
-            username: data.username,
-            email: data.email,
-          },
+          create: data,
         },
       },
     });
+  }
+
+  async getCredentials(
+    data: Prisma.CredentialWhereUniqueInput,
+  ): Promise<Credential> {
+    return this.prisma.credential.findUnique({ where: data });
   }
 }

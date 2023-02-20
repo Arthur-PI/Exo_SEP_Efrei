@@ -1,8 +1,9 @@
+/* eslint-disable prettier/prettier */
 import { PrismaService } from '@/prisma.service';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Prisma, Room } from '@prisma/client';
 
-type RoomFindData = {
+export type RoomFindData = {
   skip?: number;
   take?: number;
   cursor?: Prisma.RoomWhereUniqueInput;
@@ -10,8 +11,14 @@ type RoomFindData = {
   orderBy?: Prisma.RoomOrderByWithRelationInput;
 };
 
+function format_date(date: Date) {
+  return date.toISOString().substring(0, 10);
+}
+
 @Injectable()
 export class RoomService {
+  private readonly logger = new Logger(RoomService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async room(roomUniqueId: Prisma.RoomWhereUniqueInput): Promise<Room | null> {
@@ -28,5 +35,35 @@ export class RoomService {
     return this.prisma.room.create({
       data,
     });
+  }
+
+  async availableRooms(start: Date, end: Date): Promise<Room[]> {
+    if (start >= end) {
+      throw new Prisma.PrismaClientValidationError('Invalid dates');
+    }
+    return this.prisma.$queryRaw(Prisma.sql`
+      SELECT id FROM "Room"
+        EXCEPT (
+          SELECT room_id FROM "Booking"
+                        WHERE (date_end > ${start} AND date_end <= ${end})
+                           OR (date_start >= ${start} AND date_start < ${end})
+                           OR (date_start < ${start} AND date_end > ${end})
+        );
+    `);
+  }
+
+  async bookedRooms(start: Date, end: Date): Promise<Room[]> {
+    if (start >= end) {
+      throw new Prisma.PrismaClientValidationError('Invalid dates');
+    }
+    return this.prisma.$queryRaw(Prisma.sql`
+    SELECT * FROM "Room"
+      WHERE id IN (
+        SELECT room_id FROM "Booking"
+                      WHERE (date_end > ${start} AND date_end <= ${end})
+                         OR (date_start >= ${start} AND date_start < ${end})
+                         OR (date_start < ${start} AND date_end > ${end})
+      );
+    `);
   }
 }

@@ -11,6 +11,8 @@ model Room {
   id       Int       @id @default(autoincrement())
   number   Int       @unique
   name     String?
+  price    Float
+  capacity Int
   bookings Booking[]
 }
 
@@ -31,11 +33,14 @@ model Credential {
 }
 
 model Booking {
-  id      Int  @id @default(autoincrement())
-  room    Room @relation(fields: [room_id], references: [id])
-  room_id Int
-  user    User @relation(fields: [user_id], references: [id])
-  user_id Int
+  id         Int      @id @default(autoincrement())
+  room       Room     @relation(fields: [room_id], references: [id])
+  room_id    Int
+  user       User     @relation(fields: [user_id], references: [id])
+  user_id    Int
+  days       Int
+  date_start DateTime @db.Date
+  date_end   DateTime @db.Date
 }
 
 enum Role {

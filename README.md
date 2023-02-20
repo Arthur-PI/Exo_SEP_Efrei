@@ -10,7 +10,7 @@
 `pnpm install`
 
 ## Initialize DB
-`pnpm prisma generate`
+`pnpm prisma generate`  
 `pnpm prisma migrate dev`
 
 ## Run the app 😊
